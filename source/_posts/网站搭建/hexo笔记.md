@@ -34,28 +34,21 @@ hexo d -g
 
 # 新电脑部署旧网站 #   
 
+> !!注意以下文件目录不可变更, 如需变更则要更改所有脚本的内的文件路径   
+
 ## 旧电脑操作 ##   
-保存hexo路径下的以下文件:   
->   scaffolds   
-    source   
-    themes   
-    .gitignore   
-    db.json   
-    package-lock.json   
-    package.json   
-    _config.butterfly.yml   
-    _config.landscape.yml   
->   _config.yml   
+   执行``一键部署并同步.bat``脚本
 
 ## 新电脑操作 ##   
 1. 安装Node.js环境:<https://nodejs.org/en/download/>   
-2. 新建文件夹``D:\Personal Blog\hexo``，将旧电脑中保存的文件放入该文件夹内   
-3. 在该文件夹内安装hexo   
+2. 在``D:\Personal Blog``目录, clone Github的``hexo-config``仓库    
+3. 执行``迁移脚本.bat``脚本   
+4. 在``D:\Personal Blog\hexo``安装hexo   
    ```PowerShell
    npm install hexo-cli -g
    npm install
    ```   
-4. 设置脚本执行策略
+5. 设置脚本执行策略
    ```PowerShell
    # 查看脚本执行策略
    # Restricted: 严格模式
