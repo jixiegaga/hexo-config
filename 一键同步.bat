@@ -15,4 +15,5 @@ cd /d "%destinationPath%"
 git add .
 git commit -m "auto update"
 git push origin master
-pause
+echo 一键同步完成!
+exit
