@@ -12,4 +12,5 @@ xcopy /i /y "%sourcePath%\_config.yml" "%destinationPath%"
 xcopy /i /y "%sourcePath%\package.json" "%destinationPath%"
 xcopy /i /y "%sourcePath%\package-lock.json" "%destinationPath%"
 echo Ç¨ÒÆ½Å±¾Íê³É!
+pause
 exit
