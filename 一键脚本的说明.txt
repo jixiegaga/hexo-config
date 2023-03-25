@@ -1,0 +1,4 @@
+1. 设置hexo的目录为 D:\Personal Blog\hexo
+2. 设置hexo-config的目录为 D:\Personal Blog\hexo-config
+
+脚本直接在hexo-config文件夹内执行
