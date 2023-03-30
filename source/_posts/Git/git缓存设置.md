@@ -1,8 +1,8 @@
 ---
 title: git缓存设置
 date: 2023-03-10 10:09:17
-tags: ["Git"]
-categories: ["Git"]
+tags: ["git"]
+categories: ["git"]
 
 ---
 # 修改git缓存 #
