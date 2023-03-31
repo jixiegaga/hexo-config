@@ -13,7 +13,7 @@ wrong_hash_message: 抱歉, 这个文章不能被校验, 不过您还是能看�
 # UI #
 ## BaseGameNode类 底层基类 ##
 
-### 1. 初始化 ###
+### 初始化 ###
 ```Lua
 --[[
     直接在Scene上创建一个Prefab(WIN_DEV下直接同步加载原始资源)
@@ -38,7 +38,7 @@ BaseGameNode:initEmptyGameObject(name)
 BaseGameNode:initGameObject(obj)
 ```
 
-### 3. 子父节点 ###  
+### 子父节点 ###  
 ```Lua
 --[[
     第1种情况:
@@ -101,7 +101,7 @@ BaseGameNode:removeChild(child, cleanup)
 BaseGameNode:removeFromParent(cleanup)
 ```
 
-### 4. 销毁 ###
+### 销毁 ###
 ```Lua
 --[[
     销毁self.pGameObject  
@@ -118,7 +118,7 @@ BaseGameNode:cleanup()
 BaseGameNode:onCleanUp()    -- 默认空, 自行重写
 ```
 
-### 5. 状态 ###
+### 状态 ###
 ```Lua
 --[[
     设置self.pGameObject的active
@@ -128,7 +128,80 @@ BaseGameNode:setActive(ac)
 BaseGameNode:onActiveChange(bValue) -- 默认空, 自行重写
 ```
 
-### 6. update ###
+### Update功能 ###
 ```Lua
+--[[
+    通过EventManager开启Update事件, 每帧调用update()
+]]
+BaseGameNode:triggerUpdate()
+BaseGameNode:update()   -- 默认空(声明都没声明), 自行重写
 
+
+--[[
+    同上
+]]
+BaseGameNode:triggerLateUpdate()
+BaseGameNode:lateUpdate()
+
+
+--[[
+    同上
+]]
+BaseGameNode:triggerFixedUpdate()
+BaseGameNode:fixedUpdate()
+
+
+-- 关闭update 需使用EventManager:removeXXX()
 ```
+
+### Action功能 ###
+```Lua
+--[[
+    -@param action Action
+    通过EventManager执行action(其实就是调用action的逻辑函数)
+]]
+BaseGameNode:runAction(action)
+
+
+--[[
+    -@param action Action
+    通过EventManager停止action
+]]
+BaseGameNode:stopAction(action)
+
+
+--[[
+    通过EventManager听说该节点的所有action
+]]
+BaseGameNode:stopAllAction()
+```
+
+### 监听 消息/事件 功能 ###
+```Lua
+--[[
+    添加事件监听, 使用此方法添加的监听不用在节点销毁前手动移除
+    -@param key number 需要在MessageManager定义消息id
+    -@param fun fun():nil 回调函数不能带除self以外参数
+    -@param obj BaseGameNode 参数fun的self调用者
+]]
+BaseGameNode:addMessageListener(key, fun, obj)
+
+
+--[[
+    移除事件监听, 参数同上
+]]
+BaseGameNode:removeMessageListener(key, fun, obj)
+
+
+--[[
+    移除所有事件监听, 即使监听obj参数不是自己
+]]
+BaseGameNode:removeAllMessageListener()
+```
+
+
+## BaseUbiUI ##
+dsad
+
+# 网络 #
+asdasd
