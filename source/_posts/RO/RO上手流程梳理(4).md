@@ -5,7 +5,7 @@ tags:
 - RO
 categories: "RO"
 abstract: 不要看不要看!
-message: RO的SVN密码
+message: RO的中文拼音缩写
 wrong_pass_message: 别看！
 wrong_hash_message: 抱歉, 这个文章不能被校验, 不过您还是能看看解密后的内容.
 ---

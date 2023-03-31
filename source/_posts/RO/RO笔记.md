@@ -10,12 +10,10 @@ wrong_pass_message: 别看！
 wrong_hash_message: 抱歉, 这个文章不能被校验, 不过您还是能看看解密后的内容.
 ---
 
-[toc]   
-
 # UI #
 ## BaseGameNode类 底层基类 ##
 
-1. 初始化
+### 1. 初始化 ###
 ```Lua
 --[[
     直接在Scene上创建一个Prefab(WIN_DEV下直接同步加载原始资源)
@@ -40,7 +38,7 @@ BaseGameNode:initEmptyGameObject(name)
 BaseGameNode:initGameObject(obj)
 ```
 
-3. 子父节点   
+### 3. 子父节点 ###  
 ```Lua
 --[[
     第1种情况:
@@ -103,7 +101,7 @@ BaseGameNode:removeChild(child, cleanup)
 BaseGameNode:removeFromParent(cleanup)
 ```
 
-4. 销毁
+### 4. 销毁 ###
 ```Lua
 --[[
     销毁self.pGameObject  
@@ -120,7 +118,7 @@ BaseGameNode:cleanup()
 BaseGameNode:onCleanUp()    -- 默认空, 自行重写
 ```
 
-5. 状态
+### 5. 状态 ###
 ```Lua
 --[[
     设置self.pGameObject的active
@@ -128,4 +126,9 @@ BaseGameNode:onCleanUp()    -- 默认空, 自行重写
 ]]
 BaseGameNode:setActive(ac)
 BaseGameNode:onActiveChange(bValue) -- 默认空, 自行重写
+```
+
+### 6. update ###
+```Lua
+
 ```
