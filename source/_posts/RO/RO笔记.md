@@ -181,7 +181,7 @@ BaseGameNode:stopAllAction()
 --[[
     添加事件监听, 使用此方法添加的监听不用在节点销毁前手动移除
     -@param key number 需要在MessageManager定义消息id
-    -@param fun fun():nil 回调函数不能带除self以外参数
+    -@param fun fun(...):nil 回调函数
     -@param obj BaseGameNode 参数fun的self调用者
 ]]
 BaseGameNode:addMessageListener(key, fun, obj)
@@ -197,6 +197,33 @@ BaseGameNode:removeMessageListener(key, fun, obj)
     移除所有事件监听, 即使监听obj参数不是自己
 ]]
 BaseGameNode:removeAllMessageListener()
+
+
+--[[
+    添加自身事件监听, 使用此方法添加的监听不用在节点销毁前手动移除,
+    但是事件只适用于与在自己类内部使用, 也就是说事件id应该定义在自己类的文件里
+    -@param key number 需要在self内定义消息id
+    -@param fun fun():nil 回调函数
+    -@param BaseGameNode 参数fun的self调用者
+]]
+BaseGameNode:on(key, fun, obj)
+
+
+--[[
+    移除通过BaseGameNode:on()注册的事件, 参数同,
+    如果fun为nil但obj不为nil的话, 则移除所有该key的事件.
+]]
+BaseGameNode:off(key, fun, obj)
+
+
+--[[
+    触发通过BaseGameNode:on()注册的key事件
+    -@param ... any 回调函数的参数
+]]
+BaseGameNode:send(key, ...)
+
+--两种事件形式的区别是: 第一种的事件是所有类都可以监听的, 并且又MessageManager触发.
+--  第二种事件是只有self自己可以监听的, 并且由自身self触发.
 ```
 
 
