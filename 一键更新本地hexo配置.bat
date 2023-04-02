@@ -1,4 +1,4 @@
-@echo off
+@echo on
 echo 正在从git上拉取配置, 请稍等...
 git pull origin master
 echo 配置拉取完成!

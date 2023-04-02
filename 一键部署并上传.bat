@@ -1,4 +1,4 @@
-@echo off
+@echo on
 echo 正在执行一键部署文章,请稍等...
 start powershell.exe -ExecutionPolicy RemoteSigned -File "D:\Personal Blog\hexo-config\一键部署文章.ps1"
 :wait
