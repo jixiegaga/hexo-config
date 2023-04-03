@@ -11,13 +11,32 @@ categories: "RO"
 ---
 
 # UI #
-## BaseGameNode类 底层基类 ##
+## 底层基类(不算是UI) BaseGameNode类 ##
+
+最底层基类, 谁也没继承, 单纯的class()
+
+### 比较疑惑的字段 ###
+```Lua
+--[[
+    都是局部变量, 但是偶尔会出现bug, 所以时常使用RectTransform.anchoredPosition
+    来替代.
+]]
+self._position
+self._scale
+self._rotation
+
+--[[
+    这个名字可以自己定的, 有set和get方法.
+]]
+self.__name
+```
 
 ### 初始化 ###
 ```Lua
 --[[
-    直接在Scene上创建一个Prefab(WIN_DEV下直接同步加载原始资源)
+    直接在Scene上创建一个Prefab (同步加载)
     然后调用initGameObject()将这个GameObject绑定
+    -@param path string "res/view/prefab/xxx/xxx.prefab"
     -@return GameObject
 ]]
 BaseGameNode:initPrefabGameObject(path)
@@ -92,7 +111,7 @@ BaseGameNode:removeChild(child, cleanup)
 
 --[[
     第1种情况:
-        -@param cleanup true
+        -@param cleanup true | nil
         作用: 通过cleanup()销毁自己
     第2中情况:
         -@param cleanup false
@@ -227,8 +246,338 @@ BaseGameNode:send(key, ...)
 ```
 
 
-## BaseUbiUI ##
-dsad
+## 二级派生类(不算UI) BaseViewItem ##
 
+继承自BaseGameNode, BaseViewItem: BaseGameNode.
+
+### 状态 ###
+```Lua
+--[[
+    简单调用BaseGameNode的setActive().
+]]
+BaseViewItem:show()
+BaseViewItem:hide()
+```
+
+### 资源下载/网络 ###
+```Lua
+--[[
+    返回UI的prefab路径, 会在BaseViewItem:loadRes中使用, 一定要重写!!
+    -@return string | table 如下:
+        return "res/view/prefab/xxx/xxxLayer.prefab"
+        return { "res/view/prefab/xxx/xxxLayer.prefab" }
+]]
+BaseViewItem:getAssetPath()
+
+--[[
+    通过DownLoadManager进行异步加载BaseViewItem:getAssetPath()的路径
+    -@param scb fun():nil 加载成功的回调
+    -@param fcb fun():nil 加载失败的回调
+    -@param silience boolean 是否进行静默下载(不显示加载界面进度)
+]]
+BaseViewItem:loadRes(scb, fcb, silience)
+```
+
+## 三级派生类(UI的底层节点基类) BaseUINode ##
+
+继承自 BaseViewItem, BaseUINode: BaseViewItem.
+
+### 初始化(同BaseGameNode基本一样) ###
+```Lua
+--[[
+    重写了BaseGameNode:initEmptyGameObject()
+
+    在场景上创建一个空的GameObject, 
+    然后调用BaseGameNode:initGameObject()绑定pTransform和pGameObject.
+    -@param name string 创建GameObject的游戏对象名
+    -@param comp nil | Component 创建时附带要添加的组件, 为nil时自动添加RectTransform
+    -@return nil
+]]
+BaseUINode:initEmptyGameObject(name, comp)
+
+
+--[[
+    重写了BaseGameNode:initGameObject()
+
+    绑定obj给pGameObject和pTransform, 
+    并调用BaseUINode:autoMatchingText(), 并不知道作用...
+    -@param obj GameObject
+]]
+BaseUINode:initGameObject(obj)
+
+
+--[[
+    重写了BaseGameNode:initPrefabGameObject()
+
+    在场景上创建该prefab的GameObject (通过同步加载),
+    然后调用BaseGameNode:initGameObject()绑定pTransform和pGameObject, 
+    并调用BaseUINode:autoMatchingText(), 并不知道作用...
+    -@param path string "res/view/prefab/xxx/xxx.prefab"
+    -@return GameObject
+]]
+BaseUINode:initPrefabGameObject(path)
+```
+
+### 特殊方法(添加maskLayer) ###
+```Lua
+--[[
+    添加maskLayer, 就是UI后面盖了一层黑色透明布的感觉.
+    添加的位置在pTransform的子节点下的第一个节点(所以要在其他GameObject生成完再调用).
+    -@param cb fun():nil 点击maskLayer区域的回调函数(通常是关闭UI, BaseGameNode:removeFromParent())
+    -@param alpha number 0~1, maskLayer的黑色程度, 通常填nil
+    -@param isPassEvent boolean 不懂, 通常填false
+    -@return Transform 该maskLayer的Transform.
+]]
+BaseUINode:addMaskLayer(cb, alpha, isPassEvent)
+
+
+--[[
+    添加高斯模糊背景图 (没用过)
+]]
+BaseUINode.addBlurTexture(color)
+```
+
+## 四级派生类(UI节点类) BaseUI ##
+
+继承自BaseUINode, BaseUI: BaseUINode
+
+## 初始化 ##
+> 注意遗弃的方法:   
+> ``BaseUINode:initPrefabGameObject()`` 改用 ``BaseUI:initPanel()``.   
+
+```Lua
+--[[
+    重写了BaseUINode:initEmptyGameObject()
+
+    在场景上创建一个空的GameObject,
+    并添加RectTransform组件,
+    并绑定pGameObject和pTransform.
+]]
+BaseUI:initEmptyGameObject(name)
+
+
+--[[
+    创建一个空的游戏对象uiRoot, 并将pTransform和pGameObject绑定到它上面,
+    然后创建一个self.panel = BaseUINode:new(), 
+    并调用self.panel的initPrefabGameObject()进行初始化, 
+    并通过self.addChild()将self.panel作为子节点.
+    -@param path string panel的预制体地址 "res/view/prefab/xxx/xxxLayer.prefab"
+    -@return GameObject panel的游戏对象
+]]
+BaseUI:initPanel(path)
+
+
+--[[
+    创建一个空的游戏对象uiRoot, 并将pTransform和pGameObject绑定到它上面, 
+    然后创建一个self.panel = BaseUINode:new(),
+    并调用self.panel的initGameObject(go)进行初始化,
+    并通过self.addChild()将self.panel作为子节点.
+    -@pram go GameObject 作为self.panel.pGameObject的游戏对象
+    -@return GameObject self.panel.pGameObject
+]]
+BaseUI:initPanelGameObject(go)
+```
+
+## 子父节点 ##
+
+> 当添加子节点是node是BaseGameNode及派生类时, 使用BaseUI:addSubLayer().   
+
+```Lua
+--[[
+    同BaseGameNode:addChild()一样.
+]]
+BaseUI:addSubLayer(layer)
+```
+
+## 销毁 ##
+```Lua
+
+--[[
+    重写了BaseGameNode:cleanup().
+
+    只是在原本的基础上加入self.panel的DOKill().
+]]
+BaseUI:cleanup()
+
+
+--[[
+    不建议使用该接口, 应改用BaseUI:defaultClose()
+    实际上是调用 BaseGameNode:removeFromParent().
+]]
+BaseUI:removeSelf()
+
+
+--[[
+    可重写 !!
+
+    实际上要销毁时应该调用该接口, 因为该接口会被android的返回键调用, 
+    有特殊处理时可以直接重写该接口.
+    
+    调用该接口会出现两种情况:
+    1. 当该BaseUI作为系统的主界面时, 也就是绑定了id和Control时, 实际上调用的是
+        Control里的removeView(), 同样会调用BaseUI:removeSelf().
+    2. 当该BaseUI只是作为一个普通一级界面时, 只会调用BaseIO:remvoeSelf().
+]]
+BaseUI:defaultClose()
+
+
+--[[
+    快速设置关闭按钮, 调用的是BaseUI:defaultClose().
+    -@param btnTransform Transform 含有button组件的Transform
+]]
+BaseUI:addClickDefaultClose(btnTransform)
+```   
+
+> 总结: 有关闭按钮就调用``BaseUI:addClickDefaultClose()``,   
+> 需要调用关闭接口就调用``BaseUI.defaultClose()``, 不要调用removeSelf().
+
+## 特殊方法(UI浮入DOTween) ##
+```Lua
+--[[
+    self.panel.pTransform播放浮入动画, 使用DOTween实现, 
+    当动画还在播放时self.isAnimation == true.
+    并且为了播放该动画会在self.panel.pTransform上添加CanvasGroup组件,
+    用于控制透明度动画.
+    -@param time number 动画时间
+]]
+BaseUI:floatIn(time)
+```
+
+## 特殊方法(ui放大进入DOTween) ##
+```Lua
+--[[
+    self.panel.pTransform播放放大动画, 使用DOTween实现,
+    当动画还在播放时self.isAnimation == true.
+    -@param time number 动画时间
+]]
+BaseUI:scaleIn(time)
+```
+
+## 五级派生类(UI节点类) BaseSubUI ##
+
+### 销毁 ###
+```Lua
+--[[
+    重写了BaseUI:removeSelf().
+
+    不建议使用该接口, 应改用BaseUI:defaultClose().
+    实际调用了BaseGameNode:removeFromParent().
+]]
+BaseSubUI:removeSelf()
+```
+
+## 不同类的使用规律总结 ##
+
+以下说明了什么情况用什么, 怎么用.
+
+### 当创建的是类似于玩家头像节点这样的UI时 ###  
++ 继承自BaseUINode, 命名为nodeXXX.
++ 节点创建完需要设置父节点
++ 基础定义框架:
+  + A: 公共节点框架:
+    ```Lua
+    --[[
+          注意注意是异步的 !!!
+
+        外部通过该接口创建Node.
+        -@param param1 any 初始化参数1
+        -@param param2 any 初始化参数2
+    ]]
+    function NodeXXX:create(param1, param2)
+        local node = NodeXXX:new(param1, param2)
+        return node
+    end
+
+
+    function NodeXXX:ctor(param1, param2)
+        BaseUINode.ctor(self)
+
+        -- 在此进行变量初始化
+        self._a = param1
+        self._b = param2
+        self._nodeGameObject = nil
+        self._nodeTransform = nil
+
+        self:init()
+    end
+
+
+    --[[
+        在此处进行Node预制体的异步加载, 并通过回调函数进行其他初始化工作.
+    ]]
+    function NodeXXX:init()
+        self:initEmptyGameObject("NodeXXX") -- 绑定pTransform, pGameObject.
+
+        ---@param prefabGameObject GameObject 异步加载成功的预制体GameObject.
+        local function onDownloadSucc(prefabGameObject)
+            self._nodeGameObject = prefabGameObject
+            self._nodeTransform = prefabGameObject.transform
+            self:addChild(nil, self._nodeTransform)
+            self:initComponents()
+            self:initXXX()
+            self:setXXX()
+        end
+
+        local function onDownloadFail()
+            logError("NodeXXX load failed, path:" + NodeXXX.prefabPath)
+        end
+
+        -- 异步加载并回调, 最后一个参数必填self.pGameObject.
+        ResTool:getPrefabGameObjectAsyn(NodeXXX.prefabPath,
+            onDownloadSucc,
+            onDownloadFail,
+            self.pGameObject
+        )
+    end
+    ```
+  + B: 某一层的私有节点框架:
+    ```Lua
+    --[[
+        外部通过该接口创建Node.
+        -@param parentNode BaseGameNode 父节点
+        -@param prefabGameObject GameObject Node预制体()
+        -@param param1 any 初始化参数1
+        -@param param2 any 初始化参数2
+    ]]
+    function NodeXXX:create(parentNode, prefabGameObject, param1, param2)
+        local node = NodeXXX:new(parentNode, prefabGameObject, param1, param2)
+        return node
+    end
+
+
+    function NodeXXX:ctor(parentNode, prefabGameObject, param1, param2)
+        BaseUINode.ctor(self)
+
+        -- 在此进行变量初始化
+        self._parentNode = parentNode
+        self._prefabGameObject = prefabGameObject
+        self._a = param1
+        self._b = param2
+
+        self:init()
+    end
+
+
+    function NodeXXX:init()
+        if self._prefabGameObject == nil then
+            return
+        end
+
+        self:initEmptyGameObject("NodeXXX") -- 绑定pGameObject, pTransform.
+
+        -- 实例化游戏对象
+        self._nodeGameObject = UnityEngine.GameObject.Instantiate(self._prefabGameObject)
+        self._nodeTransform = self._nodeGameObject.transform
+        self._nodeGameObject:SetActive(true)
+        self:addChild(nil, self._nodeTransform)
+
+        self:initComponents()
+        self:initXXX()
+        self:SetXXX()
+    end
+    ```
+
+### 当创建是dialog或tips ###
++ 继承自BaseSubUI, 命名为
 # 网络 #
 asdasd
