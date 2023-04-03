@@ -341,7 +341,7 @@ BaseUINode.addBlurTexture(color)
 
 继承自BaseUINode, BaseUI: BaseUINode
 
-## 初始化 ##
+### 初始化 ###
 > 注意遗弃的方法:   
 > ``BaseUINode:initPrefabGameObject()`` 改用 ``BaseUI:initPanel()``.   
 
@@ -378,7 +378,7 @@ BaseUI:initPanel(path)
 BaseUI:initPanelGameObject(go)
 ```
 
-## 子父节点 ##
+### 子父节点 ###
 
 > 当添加子节点是node是BaseGameNode及派生类时, 使用BaseUI:addSubLayer().   
 
@@ -389,7 +389,7 @@ BaseUI:initPanelGameObject(go)
 BaseUI:addSubLayer(layer)
 ```
 
-## 销毁 ##
+### 销毁 ###
 ```Lua
 
 --[[
@@ -431,7 +431,7 @@ BaseUI:addClickDefaultClose(btnTransform)
 > 总结: 有关闭按钮就调用``BaseUI:addClickDefaultClose()``,   
 > 需要调用关闭接口就调用``BaseUI.defaultClose()``, 不要调用removeSelf().
 
-## 特殊方法(UI浮入DOTween) ##
+### 特殊方法(UI浮入DOTween) ###
 ```Lua
 --[[
     self.panel.pTransform播放浮入动画, 使用DOTween实现, 
@@ -443,7 +443,7 @@ BaseUI:addClickDefaultClose(btnTransform)
 BaseUI:floatIn(time)
 ```
 
-## 特殊方法(ui放大进入DOTween) ##
+### 特殊方法(ui放大进入DOTween) ###
 ```Lua
 --[[
     self.panel.pTransform播放放大动画, 使用DOTween实现,
@@ -579,5 +579,7 @@ BaseSubUI:removeSelf()
 
 ### 当创建是dialog或tips ###
 + 继承自BaseSubUI, 命名为
+  
+  
 # 网络 #
 asdasd
