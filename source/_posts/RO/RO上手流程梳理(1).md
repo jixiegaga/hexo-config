@@ -4,6 +4,7 @@ date: 2023-01-31 20:17:33
 tags:
 - RO
 categories: "RO"
+password: xjcs
 abstract: 不要看不要看!
 message: RO的中文拼音缩写
 wrong_pass_message: 别看！
