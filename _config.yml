@@ -103,7 +103,7 @@ theme: butterfly
 ## Docs: https://hexo.io/docs/one-command-deployment
 deploy:
   type: git
-  repo: https://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@github.com/jixiegaga/jixiegaga.github.io.git
+  repo: https://github.com/jixiegaga/jixiegaga.github.io.git
   branch: master
 
 # Security
