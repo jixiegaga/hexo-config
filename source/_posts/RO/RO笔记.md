@@ -357,7 +357,7 @@ BaseUI:initEmptyGameObject(name)
 
 
 --[[
-    创建一个空的游戏对象uiRoot, 并将pTransform和pGameObject绑定到它上面,
+    创建一个空的游戏对象uiRoot, 并将pTransform和pGameObject绑定到它上面(pGameObject是nil才有这一步),
     然后创建一个self.panel = BaseUINode:new(), 
     并调用self.panel的initPrefabGameObject()进行初始化, 
     并通过self.addChild()将self.panel作为子节点.
@@ -368,7 +368,7 @@ BaseUI:initPanel(path)
 
 
 --[[
-    创建一个空的游戏对象uiRoot, 并将pTransform和pGameObject绑定到它上面, 
+    创建一个空的游戏对象uiRoot, 并将pTransform和pGameObject绑定到它上面(pGameObject是nil才有这一步), 
     然后创建一个self.panel = BaseUINode:new(),
     并调用self.panel的initGameObject(go)进行初始化,
     并通过self.addChild()将self.panel作为子节点.
@@ -471,15 +471,17 @@ BaseSubUI:removeSelf()
 以下说明了什么情况用什么, 怎么用.
 
 ### 当创建的是类似于玩家头像节点这样的UI时 ###  
+
 + 继承自BaseUINode, 命名为nodeXXX.
-+ 节点创建完需要设置父节点
++ 节点创建完需要在外部设置父节点
 + 基础定义框架:
-  + A: 公共节点框架:
+  + A: 公共节点框架(单独一个prefab文件):
     ```Lua
     --[[
           注意注意是异步的 !!!
 
         外部通过该接口创建Node.
+        不用重写getAssetPath().
         -@param param1 any 初始化参数1
         -@param param2 any 初始化参数2
     ]]
@@ -506,7 +508,7 @@ BaseSubUI:removeSelf()
         在此处进行Node预制体的异步加载, 并通过回调函数进行其他初始化工作.
     ]]
     function NodeXXX:init()
-        self:initEmptyGameObject("NodeXXX") -- 绑定pTransform, pGameObject.
+        self:initEmptyGameObject("node_XXX") -- 绑定pTransform, pGameObject.
 
         ---@param prefabGameObject GameObject 异步加载成功的预制体GameObject.
         local function onDownloadSucc(prefabGameObject)
@@ -519,7 +521,7 @@ BaseSubUI:removeSelf()
         end
 
         local function onDownloadFail()
-            logError("NodeXXX load failed, path:" + NodeXXX.prefabPath)
+            logError("NodeXXX load failed, path:" + NodeXXX.PrefabPath)
         end
 
         -- 异步加载并回调, 最后一个参数必填self.pGameObject.
@@ -530,10 +532,11 @@ BaseSubUI:removeSelf()
         )
     end
     ```
-  + B: 某一层的私有节点框架:
+  + B: 某一层的私有节点框架(节点的prefab直接放某一层的prefab里):
     ```Lua
     --[[
         外部通过该接口创建Node.
+        不用重写getAssetPath().
         -@param parentNode BaseGameNode 父节点
         -@param prefabGameObject GameObject Node预制体()
         -@param param1 any 初始化参数1
@@ -563,7 +566,7 @@ BaseSubUI:removeSelf()
             return
         end
 
-        self:initEmptyGameObject("NodeXXX") -- 绑定pGameObject, pTransform.
+        self:initEmptyGameObject("node_XXX") -- 绑定pGameObject, pTransform.
 
         -- 实例化游戏对象
         self._nodeGameObject = UnityEngine.GameObject.Instantiate(self._prefabGameObject)
@@ -577,9 +580,171 @@ BaseSubUI:removeSelf()
     end
     ```
 
-### 当创建是dialog或tips ###
-+ 继承自BaseSubUI, 命名为
-  
-  
-# 网络 #
-asdasd
+### 当创建是的Dialog弹窗时 ###
+
++ 继承子BaseSubUI, 命名为XXXDialog
+  + A: 当Dialog是某个系统私有时框架:
+    ```Lua
+        --[[
+            外部通过对应系统的Control创建Dialog.
+            需要重写getAssetPath().
+            -@param param1 初始化参数1
+            -@param param2 初始化参数2
+            -@return nil
+        ]]
+        function XXXControl:showXXXDialog(param1, param1)
+            local function onLoadSucc()
+                -- 只允许显示1个(根据需要添加)
+                --[[ 
+                    local inst = XXXControl.getDialogLayer(self):getChildByName(XXXDialog.DialogName)
+                    if inst ~= nil then
+                        inst:defaultClose()
+                    end
+                ]]
+
+                local dialog = XXXDialog:new(param1, param1)
+                XXXControl.addDialog(self, dialog)
+            end
+
+            local function onLoadFail()
+                logError(XXXDialog.DialogName + " load failed, path:" + XXXDialog.PrefabPath)
+            end
+
+            -- 加载
+            XXXDialog:loadRes(onLoadSucc, onLoadFail, true)
+        end
+
+        XXXDialog.DialogName = "XXXDialog"
+
+        function XXXDialog:ctor(param1, param2)
+            BaseSubUI.ctor(self)
+
+            -- 在此进行变量初始化
+            self._a = param1
+            self._b = param2
+            self:_setName(XXXDialog.DialogName)
+
+            self:init()
+        end
+    
+        function XXXDialog:init()
+            self:initEmptyGameObject("dialog_XXX")   -- 绑定pTransform, pGameObject
+            self:initPanel(XXXDialog.PrefabPath)    -- 绑定panel
+            self:initComponents()
+            self:setXXX()
+            self:refreshXXX()
+        end
+    ```
+  + B: 当Dialog是公共时框架:
+    ```Lua
+    --[[
+        外部通过该接口创建Dialog.
+        需要重写getAssetPath.
+        -@param param1 any 初始化参数1
+        -@param param2 any 初始化参数2
+    ]]
+    function XXXDialog:showXXXDialog(param1, param2)
+        local function onLoadSucc()
+            -- 只允许显示1个(根据需要添加)
+            --[[
+                local inst = ViewManager:getDialogByName(XXXDialog.DialogName)
+                if inst ~= nil then
+                    inst:defaultClose()
+                end
+            ]]
+
+            local dialog = XXXDialog:new(param1, param2)
+            ViewManager:addDialog(dialog)
+        end
+
+        local function onLoadFail()
+            logError(XXXDialog.DialogName + " load failed, path:" + XXXDialog.PrefabPath)
+        end
+
+        XXXDialog:loadRes(onLoadSucc, onLoadFail, true)
+    end
+
+    XXXDialog.DialogName = "XXXDialog"
+
+    function XXXDialog.ctor(param1, param2)
+        BaseSubUI.ctor(self)
+
+        -- 在此进行变量初始化
+        self._a = param1
+        self._b = param2
+        self._setName(XXXDialog.DialogName)
+
+        self:init()
+    end
+
+    function XXXDialog:init()
+        self:initEmptyGameObject("dialog_XXX")   -- 绑定pTransform, pGameObject
+        self:initPanel(XXXDialog.PrefabPath)    -- 绑定panel
+        self:initComponents()
+        self:setXXX()
+        self:refreshXXX()
+    end
+    ```
+
+### 当创建的是Tips提示时 ###
+
++ 继承自BaseSubUI, 命名为XXXTips
+  + 不论哪种情况都使用该框架:
+    ```Lua
+    --[[
+        外部通过该接口创建Tips.
+        需要重写getAssetPath()
+        -@param param1 any 初始化参数1
+    ]]
+    function XXXTips:loadAndShow(param1)
+        -- 只允许显示1个(根据需要添加)
+        local inst = ViewManager:getTipsByName(XXXTips.TipsName)
+        if inst ~= nil then
+            return
+        end
+
+        local function onLoadSucc()
+            local tips = XXXTips:new(param1)
+            ViewManager:addTips(tips)
+        end
+
+        local function onLoadFail()
+            logError(XXXTips.TipsName + " load failed, path: " + XXXTips.PrefabPath)
+        end
+
+        XXXTips:loadRes(onLoadSucc, onLoadFail, true)
+    end
+
+    XXXTips.TipsName = "XXXTips"
+
+    function XXXTips:ctor(param1)
+        BaseSubUI:ctor(self)
+
+        -- 进行变量初始化
+        self._a = param1
+        self:_setName(XXXTips.TipsName)
+
+        self:init()
+    end
+
+    function XXXTips:init()
+        self:initEmptyGameObject("tips_XXX")   -- 绑定pTransform, pGameObject
+        self:initPanel(XXXTips.PrefabPath)      -- 绑定panel
+        self:initComponents()
+        self:setXXX()
+        self:refreshXXX()
+    end
+
+    ```
+
+### 当创建的是二级页面UI ###
+
++ 继承自BaseSubUI
++ 命名 XXXUI
++ 外部接口create(), 常规initPanel(XXXUI.PrefabPath)
+
+
+### 当创建的是... ###
+
+
+# ... #
