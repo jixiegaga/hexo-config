@@ -592,7 +592,7 @@ BaseSubUI:removeSelf()
             -@param param2 初始化参数2
             -@return nil
         ]]
-        function XXXControl:showXXXDialog(param1, param1)
+        function XXXControl:loadAndShow(param1, param1)
             local function onLoadSucc()
                 -- 只允许显示1个(根据需要添加)
                 --[[ 
@@ -643,7 +643,7 @@ BaseSubUI:removeSelf()
         -@param param1 any 初始化参数1
         -@param param2 any 初始化参数2
     ]]
-    function XXXDialog:showXXXDialog(param1, param2)
+    function XXXDialog:loadAndShow(param1, param2)
         local function onLoadSucc()
             -- 只允许显示1个(根据需要添加)
             --[[
@@ -742,9 +742,3 @@ BaseSubUI:removeSelf()
 + 继承自BaseSubUI
 + 命名 XXXUI
 + 外部接口create(), 常规initPanel(XXXUI.PrefabPath)
-
-
-### 当创建的是... ###
-
-
-# ... #
