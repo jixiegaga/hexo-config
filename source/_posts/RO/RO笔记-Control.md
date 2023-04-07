@@ -17,7 +17,7 @@ self.uiClass        ---@type BaseUI | BaseSubUI | nil 类
 self.sceneClass     ---@type any 类
 self.pUI            ---@type BaseUI | BaseSubUI | nil 对象
 self.pScene         ---@type any 对象
-self.pDialogLayer   ---@type any 对象
+self.pDialogLayer   ---@type BaseSubUI 对象 弹窗层根节点
 self._assetPath     ---@type table | string | nil 加载时首先加载的资源路径
 self._subAssetPath  ---@type table | string | nil 加载完assetPath后加载的路径
 ```
@@ -92,7 +92,7 @@ BaseViewControl:loadAndCall(assets, scb, fcb, processCB)
 
 ---
 
-# 显示 #
+# 显示和添加 #
 
 ```Lua
 --[[
@@ -100,9 +100,94 @@ BaseViewControl:loadAndCall(assets, scb, fcb, processCB)
     -@param failCb fun():nil
     -@param processCB fun():nil
 
-    -@desc 1. 通过self:loadRes()异步加载self:getAssetPath()中的资源.
-            2. 通过
+    -@desc 1. 通过self:loadRes()异步加载self:getAssetPath()中的资源并赋值self._assetPath .
+            2. 通过self:loadRes()中的回调调用self.loadAndCall()来异步加载self:getSubAssetPath()中的资源
+                并赋值self._subAssetPath .
+            3. 对self._assetPath和self._subAssetPath进行资源引用计数(在C#端进行的计数).
+            4. 
 
 ]]
 BaseViewControl:openView(sucCb, failCb, processCB)
+
+
+--[[
+
+]]
+BaseViewControl:addView()
+
+
+--[[
+
+]]
+BaseViewControl:addScene()
+
+
+--[[
+
+]]
+BaseViewControl:addUI()
+
+
+
+```
+
+---
+
+# 隐藏和移除 #
+
+```Lua
+--[[
+    -@param autoShow boolean
+    -@desc 移除系统.
+            1. 移除资源引用.                 移除C#端的资源引用计数.
+            2. 调用self:removeData()        移除数据
+            3. 调用self:removeDialogLayer() 移除弹窗, self.pDialogLayer = nil .
+            4. 调用self:removeUI()          移除主UI, self.pUI = nil .
+            5. 调用self:removeScene()       移除场景, self.pScene = nil .
+            6. 调用ViewManager:removeViewFinally() 移除系统最后调用.
+]]
+BaseViewControl:removeView(autoShow)
+
+
+--[[
+    -@desc 移除数据, 函数为空, 可以重写.
+]]
+BaseViewControl:removeData()
+
+
+--[[
+    -@desc 移除该系统所有弹窗, 并将self.pDialogLayer根节点也移除置nil.
+]]
+BaseViewControl:removeDialogLayer()
+
+
+--[[
+    -@desc 移除该系统主UI, 并将self.pUI置nil.
+]]
+BaseViewControl:removeUI()
+
+
+--[[
+    -@desc 移除该系统场景, 并将self.pScene置nil
+]]
+BaseViewControl:removeScene()
+
+
+--[[
+    -@desc 根据uiLayer分4种情况:
+            对于ViewManager.UI_LAYER_BACK, 会移除其他所有前三层的control, 通过control:removeView().
+            对于ViewManager.UI_LAYER_UI01, 会隐藏其他所有前三层的control, 通过control:hideView().
+            对于ViewManager.UI_LAYER_UI02, 会隐藏UI01, UI02的control, 通过control:hideView().
+]]
+BaseViewControl:removeOrHideOtherView()
+
+
+--[[
+    -@desc 隐藏系统.
+            1. self.pUI:hide() 进行主ui的隐藏.
+            2. self.pScene:hide() 进行场景的隐藏.
+            3. self.pDialogLayer:hide() 进行弹窗的隐藏.
+            4. 进行 BaseViewControl:onHideView() 的回调.
+]]
+BaseViewControl:hideView()
 ```

@@ -1,5 +1,5 @@
 ---
-title: RO笔记
+title: RO笔记-UI
 date: 2023-03-30 14:30:47
 tags:
 - RO
@@ -96,26 +96,26 @@ BaseGameNode.setParent(nodeParent, transformParent)
 
 
 --[[
-    通过cleanup()销毁self.children中所有的BaseGameNode
+    -@desc 移除所有逻辑子节点, 并直接执行cleanup()销毁
 ]]
 BaseGameNode:removeAllChildren()
 
 
 --[[
-    通过cleanup()销毁self.children中的某个BaseGameNode
-    -@param cleanup boolean 当cleanup为false时,
-        不会使用cleanup()销毁该节点, 只会将该节点从self.children中移除.
+    -@param cleanup boolean 是否调用self:cleanup()销毁
+    -@param child BaseGameNode对象 移除的子节点
+
+    -@desc 移除某个指定的逻辑子节点(当cleanup为false时, 子节点的GameObject位置保持不对).
 ]]
 BaseGameNode:removeChild(child, cleanup)
 
 
 --[[
-    第1种情况:
-        -@param cleanup true | nil
-        作用: 通过cleanup()销毁自己
-    第2中情况:
-        -@param cleanup false
-        作用: 不会是用cleanup()销毁自己, 但会置空self.parent = nil
+    -@param cleanup boolean 是否调用self:cleanup()销毁
+
+    -@desc 从逻辑父节点移除自身(包括自身下面的子逻辑节点)
+
+    !! 当self.parent为nil时, 也会执行cleanup()销毁.
 ]]
 BaseGameNode:removeFromParent(cleanup)
 ```
