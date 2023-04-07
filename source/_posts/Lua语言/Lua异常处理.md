@@ -22,6 +22,6 @@ categories: Lua语言
     + 当level = 1(默认), 调用error位置(文件+行号).
     + 当level = 2, 指出调用error的函数的函数.
     + 当level = 0, 不添加错误位置信息.
-+ 作用: 根据level等级, 将异常的位置信息添加到message, 并抛出message异常消息.
++ 作用: 根据level等级, 将异常的位置信息添加到message, 并抛出message异常消息. 并且该error不会返回, 所以会中断当前程序.
 
 ---
